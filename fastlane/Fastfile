@@ -18,9 +18,15 @@ default_platform(:ios)
 platform :ios do
   desc "Description of what the lane does"
   lane :tag do
-	version = "1.0.0"
+    version = "1.0.0"
+    commit = git_branch()
+    release = get_github_release(url: "jamztang/testFastlane", version: version)
 
-	commit = git_branch()
+    puts release
+    if release
+      id = release["id"]
+      remove_tag(id)
+    end
 
     set_github_release(
       repository_name: "jamztang/testFastlane",
@@ -33,6 +39,15 @@ platform :ios do
       upload_assets: ["resources/test.zip"]
     )
 
+  end
+
+  def remove_tag(id)
+    github_api(
+      server_url: "https://api.github.com",
+      api_token: ENV["GITHUB_TOKEN"],
+      http_method: "DELETE",
+      path: "/repos/jamztang/testFastlane/releases/#{id}"
+    )
   end
 end
 
